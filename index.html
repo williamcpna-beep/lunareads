@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LunaReads — Biblioteca Infantil Bilíngue</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --coral:#FF6B6B; --coral-dark:#e85555;
+  --sky:#6BCBF5;   --sky-dark:#4ab8e8;
+  --sun:#FFD93D;   --sun-dark:#f0c800;
+  --grass:#6BCB77; --lavender:#C9B8FF;
+  --deep:#0D0D1A;  --ink:#1A1A2E;
+  --card-bg:rgba(255,255,255,0.07);
+  --card-border:rgba(255,255,255,0.12);
+  --glass:rgba(255,255,255,0.06);
+  --glass-border:rgba(255,255,255,0.15);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--deep);
+  color:white;
+  overflow-x:hidden;
+}
+
+/* ── CUSTOM CURSOR ── */
+.cursor{
+  width:12px;height:12px;
+  background:var(--coral);border-radius:50%;
+  position:fixed;pointer-events:none;
+  z-index:9999;
+  transition:transform 0.15s ease;
+  mix-blend-mode:difference;
+}
+.cursor-ring{
+  width:36px;height:36px;
+  border:1.5px solid var(--coral);
+  border-radius:50%;
+  position:fixed;pointer-events:none;
+  z-index:9998;
+  transition:all 0.12s ease;
+  opacity:0.5;
+}
+
+/* ── ANIMATED GRADIENT BG ── */
+.gradient-bg{
+  position:fixed;inset:0;z-index:0;
+  background:var(--deep);
+  overflow:hidden;
+}
+.orb{
+  position:absolute;border-radius:50%;
+  filter:blur(80px);opacity:0.18;
+  animation:orbFloat 15s ease-in-out infinite;
+}
+@keyframes orbFloat{
+  0%,100%{transform:translate(0,0) scale(1)}
+  33%{transform:translate(40px,-60px) scale(1.1)}
+  66%{transform:translate(-30px,40px) scale(0.9)}
+}
+
+/* ── NOISE TEXTURE ── */
+.noise{
+  position:fixed;inset:0;z-index:1;
+  pointer-events:none;opacity:0.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 40px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:background 0.4s,backdrop-filter 0.4s;
+}
+nav.scrolled{
+  background:rgba(13,13,26,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.nav-logo{
+  font-family:'Fredoka One',cursive;
+  font-size:22px;
+  display:flex;align-items:center;gap:10px;
+  text-decoration:none;
+}
+.nav-logo-icon{
+  width:38px;height:38px;
+  background:linear-gradient(135deg,var(--coral),#ff4040);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  box-shadow:0 4px 16px rgba(255,107,107,0.4);
+}
+.nav-logo-text{color:white}
+.nav-logo-text span{color:var(--sky)}
+.nav-logo-sub{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  font-size:10px;font-weight:600;
+  color:rgba(255,255,255,0.4);
+  display:block;margin-top:-4px;
+}
+.nav-links{display:flex;align-items:center;gap:32px}
+.nav-link{
+  font-size:14px;font-weight:600;
+  color:rgba(255,255,255,0.6);
+  text-decoration:none;
+  transition:color 0.2s;
+}
+.nav-link:hover{color:white}
+.btn-nav{
+  background:var(--coral);
+  color:white;font-weight:700;font-size:14px;
+  padding:10px 24px;border-radius:30px;
+  border:none;cursor:pointer;
+  box-shadow:0 4px 20px rgba(255,107,107,0.4);
+  transition:all 0.2s;
+  text-decoration:none;
+}
+.btn-nav:hover{
+  background:var(--coral-dark);
+  box-shadow:0 8px 28px rgba(255,107,107,0.5);
+  transform:translateY(-1px);
+}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:120px 24px 80px;
+  text-align:center;
+  position:relative;z-index:2;
+}
+
+.hero-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,217,61,0.12);
+  border:1px solid rgba(255,217,61,0.25);
+  border-radius:30px;
+  padding:8px 20px;
+  font-size:13px;font-weight:700;
+  color:var(--sun);
+  margin-bottom:32px;
+  animation:fadeSlideDown 0.8s ease both;
+}
+.hero-pill-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--sun);
+  animation:pulse 2s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:0.5;transform:scale(0.7)}
+}
+
+.hero-title{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(52px,9vw,96px);
+  line-height:1.0;
+  letter-spacing:-1px;
+  margin-bottom:24px;
+  animation:fadeSlideDown 0.8s 0.1s ease both;
+}
+.hero-title .line1{color:white}
+.hero-title .line2{
+  background:linear-gradient(135deg,var(--coral),#ff9f43);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-title .line3{
+  background:linear-gradient(135deg,var(--sky),var(--lavender));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-sub{
+  font-size:clamp(17px,2.5vw,21px);
+  color:rgba(255,255,255,0.55);
+  max-width:580px;line-height:1.7;
+  margin-bottom:48px;
+  font-weight:500;
+  animation:fadeSlideDown 0.8s 0.2s ease both;
+}
+.hero-sub strong{color:rgba(255,255,255,0.85)}
+
+/* Floating books row */
+.hero-books{
+  display:flex;gap:14px;
+  justify-content:center;flex-wrap:wrap;
+  margin-bottom:52px;
+  animation:fadeSlideDown 0.8s 0.3s ease both;
+}
+.hbook{
+  width:88px;height:110px;
+  border-radius:16px;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:6px;
+  border:1px solid rgba(255,255,255,0.1);
+  backdrop-filter:blur(10px);
+  cursor:default;
+  position:relative;
+  overflow:hidden;
+  transition:transform 0.3s,box-shadow 0.3s;
+}
+.hbook::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0));
+}
+.hbook:hover{
+  transform:translateY(-10px) rotate(3deg);
+  box-shadow:0 20px 40px rgba(0,0,0,0.4);
+}
+.hbook-emoji{font-size:34px;position:relative;z-index:1}
+.hbook-label{
+  font-size:9px;font-weight:800;
+  color:rgba(255,255,255,0.7);
+  text-transform:uppercase;letter-spacing:1px;
+  position:relative;z-index:1;
+}
+
+/* CTA group */
+.hero-cta-group{
+  display:flex;flex-direction:column;align-items:center;gap:16px;
+  animation:fadeSlideDown 0.8s 0.4s ease both;
+}
+.btn-hero-main{
+  display:inline-flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,var(--coral),#ff4040);
+  color:white;font-weight:800;font-size:19px;
+  padding:20px 52px;border-radius:60px;
+  border:none;cursor:pointer;
+  box-shadow:0 16px 50px rgba(255,107,107,0.45);
+  transition:all 0.25s;
+  text-decoration:none;
+  position:relative;overflow:hidden;
+}
+.btn-hero-main::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.15),rgba(255,255,255,0));
+  border-radius:60px;
+}
+.btn-hero-main:hover{
+  transform:translateY(-3px) scale(1.03);
+  box-shadow:0 24px 64px rgba(255,107,107,0.55);
+}
+.btn-arrow{
+  width:32px;height:32px;
+  background:rgba(255,255,255,0.2);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;
+}
+.hero-price{
+  font-size:15px;font-weight:600;
+  color:rgba(255,255,255,0.4);
+}
+.hero-price strong{
+  color:white;font-size:20px;
+}
+.hero-price s{color:rgba(255,255,255,0.25)}
+
+@keyframes fadeSlideDown{
+  from{opacity:0;transform:translateY(-20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* ── MARQUEE STRIP ── */
+.marquee-strip{
+  position:relative;z-index:2;
+  background:var(--coral);
+  padding:14px 0;
+  overflow:hidden;
+  white-space:nowrap;
+}
+.marquee-inner{
+  display:inline-flex;gap:48px;
+  animation:marquee 25s linear infinite;
+}
+.marquee-item{
+  font-weight:800;font-size:14px;
+  color:white;letter-spacing:0.5px;
+  display:flex;align-items:center;gap:12px;
+  flex-shrink:0;
+}
+.marquee-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(255,255,255,0.5);
+}
+@keyframes marquee{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+
+/* ── CARDS/SECTIONS COMMON ── */
+section{
+  position:relative;z-index:2;
+  padding:100px 40px;
+}
+.container{max-width:1100px;margin:0 auto}
+.tag{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:700;
+  text-transform:uppercase;letter-spacing:2px;
+  color:var(--coral);margin-bottom:16px;
+}
+.tag-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--coral);
+}
+.s-title{
+  font-family:'Fredoka One',cursive;
+  font-size:clamp(32px,5vw,52px);
+  line-height:1.15;
+  margin-bottom:16px;
+}
+.s-sub{
+  font-size:18px;
+  color:rgba(255,255,255,0.5);
+  max-width:540px;line-height:1.7;
+  font-weight:500;
+}
+
+/* ── FEATURES SECTION ── */
+.features-section{background:rgba(255,255,255,0.02)}
+.features-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:16px;margin-top:56px;
+}
+.feature-card{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:24px;
+  padding:32px 28px;
+  backdrop-filter:blur(10px);
+  transition:transform 0.3s,border-color 0.3s,background 0.3s;
+  position:relative;overflow:hidden;
+}
+.feature-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,0.04),transparent);
+  border-radius:24px;
+  opacity:0;transition:opacity 0.3s;
+}
+.feature-card:hover{
+  transform:translateY(-6px);
+  border-color:rgba(255,255,255,0.2);
+  background:rgba(255,255,255,0.1);
+}
+.feature-card:hover::before{opacity:1}
+.feature-icon-wrap{
+  width:56px;height:56px;border-radius:16px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:26px;margin-bottom:20px;
+}
+.feature-card h3{
+  font-family:'Fredoka One',cursive;
+  font-size:21px;margin-bottom:10px;
+}
+.feature-card p{
+  font-size:14px;
+  color:rgba(255,255,255,0.5);
+  line-height:1.7;
+}
+
+/* ── BOOKS SHOWCASE ── */
+.books-section{padding:100px 40px}
+.books-header{
+  display:flex;align-items:flex-end;
+  justify-content:space-between;flex-wrap:wrap;
+  gap:20px;margin-bottom:48px;
+}
+.books-tabs{
+  display:flex;gap:4px;
+  background:rgba(255,255,255,0.05);
+  border-radius:30px;padding:4px;
+  border:1px solid rgba(255,255,255,0.08);
+}
+.book-tab{
+  padding:8px 20px;border-radius:26px;
+  font-size:13px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+  color:rgba(255,255,255,0.45);
+}
+.book-tab.active{
+  background:var(--coral);color:white;
+  box-shadow:0 4px 16px rgba(255,107,107,0.35);
+}
+.books-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  gap:16px;
+}
+.book-card{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:22px;overflow:hidden;
+  transition:transform 0.3s,box-shadow 0.3s;
+  cursor:pointer;
+}
+.book-card:hover{
+  transform:translateY(-8px) scale(1.02);
+  box-shadow:0 24px 48px rgba(0,0,0,0.5);
+}
+.book-cover{
+  height:150px;display:flex;
+  align-items:center;justify-content:center;
+  font-size:60px;position:relative;
+}
+.book-type-tag{
+  position:absolute;top:10px;right:10px;
+  font-size:9px;font-weight:800;
+  padding:3px 8px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:0.8px;
+}
+.tag-vocab{background:rgba(107,203,245,0.2);color:var(--sky)}
+.tag-story{background:rgba(255,107,107,0.2);color:var(--coral)}
+.book-info{padding:14px 16px}
+.book-info h4{
+  font-family:'Fredoka One',cursive;
+  font-size:15px;margin-bottom:3px;
+}
+.book-info p{
+  font-size:11px;
+  color:rgba(255,255,255,0.35);
+  font-weight:600;
+}
+.book-meta{
+  display:flex;align-items:center;
+  justify-content:space-between;
+  margin-top:10px;
+}
+.age-chip{
+  font-size:10px;font-weight:700;
+  padding:3px 8px;border-radius:20px;
+  background:rgba(201,184,255,0.15);
+  color:var(--lavender);
+}
+.page-chip{
+  font-size:10px;color:rgba(255,255,255,0.25);
+  font-weight:600;
+}
+
+/* ── HOW IT WORKS ── */
+.how-section{
+  background:linear-gradient(160deg,rgba(255,107,107,0.05),rgba(107,203,245,0.05));
+}
+.steps-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:0;margin-top:56px;
+  position:relative;
+}
+.steps-row::before{
+  content:'';
+  position:absolute;top:32px;left:10%;right:10%;
+  height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent);
+}
+.step-item{
+  display:flex;flex-direction:column;align-items:center;
+  text-align:center;padding:0 24px 32px;
+  position:relative;
+}
+.step-num{
+  width:64px;height:64px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:26px;
+  margin-bottom:20px;position:relative;z-index:1;
+  border:1px solid rgba(255,255,255,0.15);
+  backdrop-filter:blur(10px);
+}
+.step-item h3{
+  font-family:'Fredoka One',cursive;
+  font-size:19px;margin-bottom:10px;
+}
+.step-item p{
+  font-size:14px;
+  color:rgba(255,255,255,0.45);
+  line-height:1.7;
+}
+
+/* ── BILINGUAL SECTION ── */
+.bilingual-section{padding:100px 40px}
+.bi-wrap{
+  background:linear-gradient(135deg,rgba(255,255,255,0.05),rgba(255,255,255,0.02));
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:32px;
+  padding:72px 56px;
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:64px;align-items:center;
+  backdrop-filter:blur(10px);
+  position:relative;overflow:hidden;
+}
+.bi-wrap::before{
+  content:'';position:absolute;
+  width:400px;height:400px;border-radius:50%;
+  background:var(--coral);opacity:0.05;
+  top:-100px;right:-100px;
+  filter:blur(40px);
+}
+.bi-left .s-sub{color:rgba(255,255,255,0.5)}
+.bi-flags{
+  display:flex;gap:20px;margin-top:36px;flex-wrap:wrap;
+}
+.bi-flag{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:14px;padding:12px 18px;
+  font-size:14px;font-weight:700;
+  transition:background 0.2s;
+}
+.bi-flag:hover{background:rgba(255,255,255,0.1)}
+.bi-flag-icon{font-size:22px}
+.bi-right{display:flex;flex-direction:column;gap:12px}
+.bi-feature{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.07);
+  border-radius:14px;padding:16px 20px;
+  font-size:14px;font-weight:600;
+  color:rgba(255,255,255,0.75);
+  transition:background 0.2s,transform 0.2s;
+}
+.bi-feature:hover{background:rgba(255,255,255,0.08);transform:translateX(6px)}
+.bi-check{
+  width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--grass),#4ab84a);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;flex-shrink:0;
+}
+
+/* ── TESTIMONIALS ── */
+.testimonials-section{
+  background:rgba(255,255,255,0.01);
+}
+.testimonials-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:16px;margin-top:56px;
+}
+.tcard{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:24px;padding:32px;
+  backdrop-filter:blur(10px);
+  transition:transform 0.3s;
+  position:relative;
+}
+.tcard:hover{transform:translateY(-4px)}
+.tcard-quote{
+  font-family:'Fredoka One',cursive;
+  font-size:56px;
+  color:var(--coral);opacity:0.3;
+  line-height:0.8;margin-bottom:16px;
+}
+.tcard-stars{
+  color:var(--sun);font-size:14px;
+  letter-spacing:2px;margin-bottom:16px;
+}
+.tcard-text{
+  font-size:15px;
+  color:rgba(255,255,255,0.7);
+  line-height:1.8;margin-bottom:24px;
+  font-weight:500;
+}
+.tcard-author{
+  display:flex;align-items:center;gap:12px;
+}
+.tcard-avatar{
+  width:44px;height:44px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;
+}
+.tcard-name{font-weight:800;font-size:14px}
+.tcard-info{font-size:12px;color:rgba(255,255,255,0.35);font-weight:500;margin-top:2px}
+
+/* ── PRICING ── */
+.pricing-section{padding:100px 40px;text-align:center}
+.pricing-wrap{
+  max-width:520px;margin:56px auto 0;
+  position:relative;
+}
+.pricing-glow{
+  position:absolute;inset:-2px;
+  background:linear-gradient(135deg,var(--coral),var(--sky),var(--sun));
+  border-radius:34px;filter:blur(1px);
+  animation:glowPulse 3s ease-in-out infinite;
+  z-index:0;
+}
+@keyframes glowPulse{
+  0%,100%{opacity:0.6}
+  50%{opacity:1}
+}
+.pricing-card{
+  background:#0f0f1e;
+  border-radius:32px;
+  padding:52px 44px;
+  position:relative;z-index:1;
+  overflow:hidden;
+}
+.pricing-card::before{
+  content:'';position:absolute;
+  width:350px;height:350px;border-radius:50%;
+  background:var(--coral);opacity:0.06;
+  top:-120px;right:-80px;filter:blur(40px);
+}
+.pricing-card::after{
+  content:'';position:absolute;
+  width:250px;height:250px;border-radius:50%;
+  background:var(--sky);opacity:0.06;
+  bottom:-80px;left:-60px;filter:blur(40px);
+}
+.pricing-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:linear-gradient(135deg,rgba(255,217,61,0.15),rgba(255,217,61,0.08));
+  border:1px solid rgba(255,217,61,0.25);
+  color:var(--sun);font-weight:800;font-size:12px;
+  padding:6px 18px;border-radius:30px;
+  text-transform:uppercase;letter-spacing:1px;
+  margin-bottom:28px;position:relative;z-index:1;
+}
+.pricing-amount{
+  display:flex;align-items:flex-start;
+  justify-content:center;gap:4px;
+  position:relative;z-index:1;
+  margin-bottom:4px;
+}
+.pricing-currency{
+  font-family:'Fredoka One',cursive;
+  font-size:24px;color:rgba(255,255,255,0.5);
+  margin-top:16px;
+}
+.pricing-value{
+  font-family:'Fredoka One',cursive;
+  font-size:88px;line-height:1;
+  background:linear-gradient(135deg,white,rgba(255,255,255,0.7));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.pricing-per{
+  font-size:14px;color:rgba(255,255,255,0.35);
+  font-weight:600;position:relative;z-index:1;
+  margin-bottom:6px;
+}
+.pricing-original{
+  font-size:15px;color:rgba(255,255,255,0.25);
+  text-decoration:line-through;
+  font-weight:600;position:relative;z-index:1;
+  margin-bottom:36px;
+}
+.pricing-list{
+  list-style:none;text-align:left;
+  display:flex;flex-direction:column;gap:14px;
+  margin-bottom:36px;position:relative;z-index:1;
+}
+.pricing-list li{
+  display:flex;align-items:center;gap:12px;
+  font-size:15px;font-weight:600;
+  color:rgba(255,255,255,0.8);
+}
+.pcheck{
+  width:24px;height:24px;border-radius:50%;
+  background:linear-gradient(135deg,var(--grass),#4ab84a);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;flex-shrink:0;
+}
+.btn-buy{
+  display:block;width:100%;
+  background:linear-gradient(135deg,var(--coral),#ff4040);
+  color:white;font-weight:800;font-size:20px;
+  padding:20px;border-radius:18px;
+  border:none;cursor:pointer;
+  box-shadow:0 12px 40px rgba(255,107,107,0.4);
+  transition:all 0.25s;
+  text-decoration:none;
+  position:relative;z-index:1;
+  overflow:hidden;
+}
+.btn-buy::after{
+  content:'';position:absolute;
+  top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);
+  transform:skewX(-20deg);
+  animation:shimmer 2.5s ease-in-out infinite;
+}
+@keyframes shimmer{
+  0%{left:-100%}
+  100%{left:160%}
+}
+.btn-buy:hover{
+  transform:translateY(-2px);
+  box-shadow:0 20px 50px rgba(255,107,107,0.5);
+}
+.pricing-guarantee{
+  margin-top:16px;font-size:13px;
+  color:rgba(255,255,255,0.3);
+  font-weight:600;position:relative;z-index:1;
+}
+
+/* ── FAQ ── */
+.faq-section{padding:100px 40px}
+.faq-list{max-width:720px;margin:48px auto 0;display:flex;flex-direction:column;gap:8px}
+.faq-item{
+  background:var(--card-bg);
+  border:1px solid var(--card-border);
+  border-radius:18px;overflow:hidden;
+  transition:border-color 0.3s;
+}
+.faq-item.open{border-color:rgba(255,107,107,0.3)}
+.faq-q{
+  padding:22px 28px;
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;gap:16px;
+  font-size:16px;font-weight:700;
+  transition:background 0.2s;
+}
+.faq-q:hover{background:rgba(255,255,255,0.03)}
+.faq-plus{
+  width:28px;height:28px;border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;color:var(--coral);
+  transition:transform 0.3s,background 0.3s;
+  flex-shrink:0;
+}
+.faq-item.open .faq-plus{
+  transform:rotate(45deg);
+  background:rgba(255,107,107,0.15);
+}
+.faq-a{
+  max-height:0;overflow:hidden;
+  padding:0 28px;
+  transition:max-height 0.4s ease,padding 0.3s;
+  font-size:15px;
+  color:rgba(255,255,255,0.5);
+  line-height:1.8;font-weight:500;
+}
+.faq-item.open .faq-a{
+  max-height:200px;
+  padding-bottom:22px;
+}
+
+/* ── FINAL CTA ── */
+.final-section{
+  padding:100px 40px;text-align:center;
+  position:relative;overflow:hidden;
+}
+.final-glow{
+  position:absolute;
+  width:600px;height:600px;border-radius:50%;
+  background:var(--coral);opacity:0.08;
+  top:50%;left:50%;
+  transform:translate(-50%,-50%);
+  filter:blur(60px);
+  animation:glowPulse 4s ease-in-out infinite;
+}
+.final-section .s-title{
+  background:linear-gradient(135deg,white,rgba(255,255,255,0.6));
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+  background-clip:text;
+  position:relative;z-index:1;
+}
+.final-section .s-sub{
+  margin:16px auto 48px;
+  position:relative;z-index:1;
+}
+.btn-final{
+  display:inline-flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,var(--coral),#ff4040);
+  color:white;font-weight:800;font-size:20px;
+  padding:22px 56px;border-radius:60px;
+  border:none;cursor:pointer;
+  box-shadow:0 16px 50px rgba(255,107,107,0.45);
+  transition:all 0.25s;
+  text-decoration:none;
+  position:relative;z-index:1;
+}
+.btn-final:hover{
+  transform:translateY(-4px) scale(1.03);
+  box-shadow:0 28px 64px rgba(255,107,107,0.55);
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid rgba(255,255,255,0.05);
+  padding:40px;
+  display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;
+  gap:16px;
+  position:relative;z-index:2;
+}
+.footer-logo{
+  font-family:'Fredoka One',cursive;
+  font-size:18px;color:rgba(255,255,255,0.4);
+}
+.footer-logo span{color:rgba(107,203,245,0.5)}
+.footer-copy{
+  font-size:13px;font-weight:600;
+  color:rgba(255,255,255,0.2);
+}
+.footer-links{
+  display:flex;gap:24px;
+}
+.footer-link{
+  font-size:13px;font-weight:600;
+  color:rgba(255,255,255,0.3);
+  text-decoration:none;
+  transition:color 0.2s;
+}
+.footer-link:hover{color:rgba(255,255,255,0.7)}
+
+/* ── SCROLL REVEAL ── */
+.reveal{
+  opacity:0;transform:translateY(40px);
+  transition:opacity 0.7s ease,transform 0.7s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+.reveal-delay-1{transition-delay:0.1s}
+.reveal-delay-2{transition-delay:0.2s}
+.reveal-delay-3{transition-delay:0.3s}
+.reveal-delay-4{transition-delay:0.4s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-links{display:none}
+  section{padding:80px 20px}
+  .bi-wrap{grid-template-columns:1fr;padding:40px 28px;gap:40px}
+  .steps-row::before{display:none}
+  .pricing-card{padding:40px 28px}
+  .pricing-value{font-size:72px}
+  footer{flex-direction:column;text-align:center;padding:32px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursor-ring"></div>
+
+<!-- Gradient background orbs -->
+<div class="gradient-bg">
+  <div class="orb" style="width:600px;height:600px;background:#FF6B6B;top:-200px;right:-150px;animation-delay:0s"></div>
+  <div class="orb" style="width:500px;height:500px;background:#6BCBF5;bottom:-150px;left:-150px;animation-delay:5s"></div>
+  <div class="orb" style="width:400px;height:400px;background:#FFD93D;top:40%;right:20%;animation-delay:10s"></div>
+  <div class="orb" style="width:350px;height:350px;background:#C9B8FF;bottom:20%;left:25%;animation-delay:7s"></div>
+</div>
+<div class="noise"></div>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-icon">📚</div>
+    <div>
+      <div class="nav-logo-text">Luna<span>Reads</span></div>
+      <div class="nav-logo-sub">Biblioteca Infantil</div>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#features" class="nav-link">Funcionalidades</a>
+    <a href="#books" class="nav-link">Livros</a>
+    <a href="#pricing" class="nav-link">Preço</a>
+    <a href="#faq" class="nav-link">FAQ</a>
+  </div>
+  <a class="btn-nav" href="https://pay.hotmart.com/V105809354H" target="_blank">Quero agora →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-pill">
+    <div class="hero-pill-dot"></div>
+    🚀 Lançamento — Oferta especial por tempo limitado
+  </div>
+
+  <h1 class="hero-title">
+    <div class="line1">Seu filho</div>
+    <div class="line2">bilíngue</div>
+    <div class="line3">desde bebê ✨</div>
+  </h1>
+
+  <p class="hero-sub">
+    A biblioteca digital que ensina <strong>inglês americano</strong> de forma natural — com livros de vocabulário, histórias completas, áudio e ilustrações. Para crianças de <strong>0 a 6 anos</strong>.
+  </p>
+
+  <div class="hero-books">
+    <div class="hbook" style="background:linear-gradient(135deg,rgba(107,203,117,0.2),rgba(107,203,117,0.05))">
+      <div class="hbook-emoji">🐶</div>
+      <div class="hbook-label">Animais</div>
+    </div>
+    <div class="hbook" style="background:linear-gradient(135deg,rgba(255,180,180,0.2),rgba(255,180,180,0.05))">
+      <div class="hbook-emoji">🌈</div>
+      <div class="hbook-label">Cores</div>
+    </div>
+    <div class="hbook" style="background:linear-gradient(135deg,rgba(255,217,61,0.2),rgba(255,217,61,0.05))">
+      <div class="hbook-emoji">🔢</div>
+      <div class="hbook-label">Números</div>
+    </div>
+    <div class="hbook" style="background:linear-gradient(135deg,rgba(201,184,255,0.2),rgba(201,184,255,0.05))">
+      <div class="hbook-emoji">🌟</div>
+      <div class="hbook-label">Luna</div>
+    </div>
+    <div class="hbook" style="background:linear-gradient(135deg,rgba(107,203,245,0.2),rgba(107,203,245,0.05))">
+      <div class="hbook-emoji">👶</div>
+      <div class="hbook-label">Corpo</div>
+    </div>
+    <div class="hbook" style="background:linear-gradient(135deg,rgba(107,203,117,0.15),rgba(107,203,117,0.05))">
+      <div class="hbook-emoji">🐷</div>
+      <div class="hbook-label">Porquinhos</div>
+    </div>
+  </div>
+
+  <div class="hero-cta-group">
+    <a class="btn-hero-main" href="https://pay.hotmart.com/V105809354H" target="_blank">
+      Acessar a Biblioteca
+      <div class="btn-arrow">→</div>
+    </a>
+    <div class="hero-price">
+      <s>R$ 397</s> · apenas <strong>R$ 197</strong> por ano completo
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-strip">
+  <div class="marquee-inner">
+    <span class="marquee-item"><span class="marquee-dot"></span>📚 8 Livros disponíveis</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🇺🇸 Inglês americano</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🎵 Áudio por página</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>👶 De 0 a 6 anos</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>📱 Funciona no celular</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🌟 Histórias completas</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>✨ Novos livros todo mês</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🔒 7 dias de garantia</span>
+    <!-- Repeat for seamless loop -->
+    <span class="marquee-item"><span class="marquee-dot"></span>📚 8 Livros disponíveis</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🇺🇸 Inglês americano</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🎵 Áudio por página</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>👶 De 0 a 6 anos</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>📱 Funciona no celular</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🌟 Histórias completas</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>✨ Novos livros todo mês</span>
+    <span class="marquee-item"><span class="marquee-dot"></span>🔒 7 dias de garantia</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="features-section" id="features">
+  <div class="container">
+    <div class="text-center reveal">
+      <div class="tag"><div class="tag-dot"></div>Funcionalidades</div>
+      <h2 class="s-title">Uma biblioteca que<br>cresce com seu filho</h2>
+      <p class="s-sub" style="margin:0 auto">Conteúdo organizado por faixa etária — do primeiro vocabulário até histórias completas em inglês.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon-wrap" style="background:rgba(107,203,117,0.15)">📖</div>
+        <h3>Livros de Vocabulário</h3>
+        <p>Animais, cores, números e corpo — com ilustrações 3D, áudio bilíngue e troca de idioma com um toque.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon-wrap" style="background:rgba(255,107,107,0.15)">🌟</div>
+        <h3>Histórias Completas</h3>
+        <p>Personagens originais, início, meio e fim. Luna, Os Porquinhos, A Corrida e muito mais a caminho.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-3">
+        <div class="feature-icon-wrap" style="background:rgba(107,203,245,0.15)">🎵</div>
+        <h3>Áudio Natural</h3>
+        <p>Narração em inglês americano e português brasileiro. A criança escolhe o idioma antes de começar.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-4">
+        <div class="feature-icon-wrap" style="background:rgba(201,184,255,0.15)">📈</div>
+        <h3>Progressão por Idade</h3>
+        <p>0–2 anos: primeiras palavras. 3–5: histórias curtas. 5–6: narrativas completas. Sempre evoluindo.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-1">
+        <div class="feature-icon-wrap" style="background:rgba(255,217,61,0.15)">📱</div>
+        <h3>Funciona em Tudo</h3>
+        <p>Celular, tablet ou computador. Sem instalar nada — basta abrir o link no navegador e começar.</p>
+      </div>
+      <div class="feature-card reveal reveal-delay-2">
+        <div class="feature-icon-wrap" style="background:rgba(107,203,117,0.15)">🔄</div>
+        <h3>Sempre Atualizado</h3>
+        <p>Novos livros e histórias adicionados regularmente. Quem tem acesso anual recebe tudo automaticamente.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKS -->
+<section class="books-section" id="books">
+  <div class="container">
+    <div class="books-header">
+      <div class="reveal">
+        <div class="tag"><div class="tag-dot"></div>Conteúdo</div>
+        <h2 class="s-title">8 livros esperando<br>pelo seu filho</h2>
+      </div>
+      <div class="books-tabs reveal">
+        <div class="book-tab active" onclick="filterBooks('all',this)">Todos</div>
+        <div class="book-tab" onclick="filterBooks('vocab',this)">Vocabulário</div>
+        <div class="book-tab" onclick="filterBooks('story',this)">Histórias</div>
+      </div>
+    </div>
+
+    <div class="books-grid" id="books-grid">
+      <div class="book-card reveal reveal-delay-1" data-type="vocab">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(107,203,117,0.15),rgba(107,203,117,0.05))">
+          🐶<span class="book-type-tag tag-vocab">Vocab</span>
+        </div>
+        <div class="book-info">
+          <h4>Os Animais</h4><p>The Animals</p>
+          <div class="book-meta"><span class="age-chip">0–2 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+      <div class="book-card reveal reveal-delay-2" data-type="vocab">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(255,180,180,0.15),rgba(255,180,180,0.05))">
+          🌈<span class="book-type-tag tag-vocab">Vocab</span>
+        </div>
+        <div class="book-info">
+          <h4>As Cores</h4><p>The Colors</p>
+          <div class="book-meta"><span class="age-chip">0–2 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+      <div class="book-card reveal reveal-delay-3" data-type="vocab">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(107,203,245,0.15),rgba(107,203,245,0.05))">
+          👶<span class="book-type-tag tag-vocab">Vocab</span>
+        </div>
+        <div class="book-info">
+          <h4>Meu Corpinho</h4><p>My Little Body</p>
+          <div class="book-meta"><span class="age-chip">1–2 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+      <div class="book-card reveal reveal-delay-4" data-type="vocab">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(255,217,61,0.15),rgba(255,217,61,0.05))">
+          🔢<span class="book-type-tag tag-vocab">Vocab</span>
+        </div>
+        <div class="book-info">
+          <h4>Os Números</h4><p>The Numbers</p>
+          <div class="book-meta"><span class="age-chip">2–3 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+      <div class="book-card reveal reveal-delay-1" data-type="story">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(201,184,255,0.15),rgba(201,184,255,0.05))">
+          🌟<span class="book-type-tag tag-story">História</span>
+        </div>
+        <div class="book-info">
+          <h4>Luna e a Estrela</h4><p>Luna and the Lost Star</p>
+          <div class="book-meta"><span class="age-chip">0–3 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+      <div class="book-card reveal reveal-delay-2" data-type="story">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(107,203,117,0.15),rgba(107,203,117,0.05))">
+          🌱<span class="book-type-tag tag-story">História</span>
+        </div>
+        <div class="book-info">
+          <h4>Tomás e o Feijão</h4><p>Tommy and the Magic Beans</p>
+          <div class="book-meta"><span class="age-chip">3–5 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+      <div class="book-card reveal reveal-delay-3" data-type="story">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(255,150,100,0.15),rgba(255,150,100,0.05))">
+          🐷<span class="book-type-tag tag-story">História</span>
+        </div>
+        <div class="book-info">
+          <h4>Os Três Porquinhos</h4><p>The Three Little Pigs</p>
+          <div class="book-meta"><span class="age-chip">3–5 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+      <div class="book-card reveal reveal-delay-4" data-type="story">
+        <div class="book-cover" style="background:linear-gradient(135deg,rgba(107,203,117,0.12),rgba(107,203,117,0.03))">
+          🐢<span class="book-type-tag tag-story">História</span>
+        </div>
+        <div class="book-info">
+          <h4>Rafa e Tina</h4><p>Rex and Tilly — The Race</p>
+          <div class="book-meta"><span class="age-chip">3–5 anos</span><span class="page-chip">6 págs</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="container text-center" style="text-align:center">
+    <div class="reveal">
+      <div class="tag" style="justify-content:center"><div class="tag-dot"></div>Como funciona</div>
+      <h2 class="s-title">Simples como<br>contar uma história</h2>
+      <p class="s-sub" style="margin:0 auto">Sem instalação. Funciona direto no navegador do celular ou computador.</p>
+    </div>
+    <div class="steps-row">
+      <div class="step-item reveal reveal-delay-1">
+        <div class="step-num" style="background:linear-gradient(135deg,rgba(255,107,107,0.2),rgba(255,107,107,0.05))">
+          <span style="background:linear-gradient(135deg,var(--coral),#ff4040);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">1</span>
+        </div>
+        <h3>Acesse o link</h3>
+        <p>Após a compra, recebe o link de acesso. Abre direto no celular — sem baixar nada.</p>
+      </div>
+      <div class="step-item reveal reveal-delay-2">
+        <div class="step-num" style="background:linear-gradient(135deg,rgba(107,203,245,0.2),rgba(107,203,245,0.05))">
+          <span style="background:linear-gradient(135deg,var(--sky),#4ab8e8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">2</span>
+        </div>
+        <h3>Escolha o livro</h3>
+        <p>Vocabulário ou histórias? Filtre pela idade da criança e escolha o favorito.</p>
+      </div>
+      <div class="step-item reveal reveal-delay-3">
+        <div class="step-num" style="background:linear-gradient(135deg,rgba(255,217,61,0.2),rgba(255,217,61,0.05))">
+          <span style="background:linear-gradient(135deg,var(--sun),#ffb800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">3</span>
+        </div>
+        <h3>Escolha o idioma</h3>
+        <p>🇧🇷 Português ou 🇺🇸 Inglês? A criança decide! A história toda é narrada no idioma escolhido.</p>
+      </div>
+      <div class="step-item reveal reveal-delay-4">
+        <div class="step-num" style="background:linear-gradient(135deg,rgba(107,203,117,0.2),rgba(107,203,117,0.05))">
+          <span style="background:linear-gradient(135deg,var(--grass),#4ab84a);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">4</span>
+        </div>
+        <h3>Leia e ouça juntos!</h3>
+        <p>Toque ▶ para ouvir cada página. Aprender inglês nunca foi tão natural e divertido.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BILINGUAL -->
+<section class="bilingual-section">
+  <div class="container">
+    <div class="bi-wrap reveal">
+      <div class="bi-left">
+        <div class="tag"><div class="tag-dot"></div>Bilíngue</div>
+        <h2 class="s-title">Inglês americano.<br>Português brasileiro.</h2>
+        <p class="s-sub">Cada livro disponível nos dois idiomas. A criança ouve a narração completa no idioma que escolher — sem misturar.</p>
+        <div class="bi-flags">
+          <div class="bi-flag">
+            <span class="bi-flag-icon">🇧🇷</span>
+            <span>Português BR</span>
+          </div>
+          <div class="bi-flag">
+            <span class="bi-flag-icon">🇺🇸</span>
+            <span>English US</span>
+          </div>
+        </div>
+      </div>
+      <div class="bi-right">
+        <div class="bi-feature"><div class="bi-check">✓</div>Inglês americano (en-US) exclusivo</div>
+        <div class="bi-feature"><div class="bi-check">✓</div>Áudio narrado por página</div>
+        <div class="bi-feature"><div class="bi-check">✓</div>Criança escolhe o idioma</div>
+        <div class="bi-feature"><div class="bi-check">✓</div>Vocabulário progressivo por idade</div>
+        <div class="bi-feature"><div class="bi-check">✓</div>Histórias com personagens em PT e EN</div>
+        <div class="bi-feature"><div class="bi-check">✓</div>Troca de idioma a qualquer momento</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonials-section">
+  <div class="container text-center" style="text-align:center">
+    <div class="reveal">
+      <div class="tag" style="justify-content:center"><div class="tag-dot"></div>Depoimentos</div>
+      <h2 class="s-title">Famílias que já usam</h2>
+      <p class="s-sub" style="margin:0 auto">O que os pais estão dizendo sobre a LunaReads.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="tcard reveal reveal-delay-1">
+        <div class="tcard-quote">"</div>
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">"Minha filha de 2 anos pede a história da Luna todo dia antes de dormir! Já sabe falar 'star' e 'bunny' perfeitamente. É incrível como ela absorve!"</p>
+        <div class="tcard-author">
+          <div class="tcard-avatar" style="background:rgba(255,218,193,0.15)">👩</div>
+          <div>
+            <div class="tcard-name">Ana Carolina</div>
+            <div class="tcard-info">Mãe da Isabela, 2 anos · São Paulo</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard reveal reveal-delay-2">
+        <div class="tcard-quote">"</div>
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">"Comprei achando que meu filho de 4 anos não ia se interessar. Me enganei completamente! Ele fica 40 minutos ouvindo as histórias em inglês sozinho."</p>
+        <div class="tcard-author">
+          <div class="tcard-avatar" style="background:rgba(181,234,215,0.15)">👨</div>
+          <div>
+            <div class="tcard-name">Roberto Ferreira</div>
+            <div class="tcard-info">Pai do Miguel, 4 anos · Curitiba</div>
+          </div>
+        </div>
+      </div>
+      <div class="tcard reveal reveal-delay-3">
+        <div class="tcard-quote">"</div>
+        <div class="tcard-stars">★★★★★</div>
+        <p class="tcard-text">"Uso na minha escolinha com crianças de 3 a 5 anos. Eles adoram os porquinhos e a corrida! Melhor material bilíngue infantil que encontrei no mercado."</p>
+        <div class="tcard-author">
+          <div class="tcard-avatar" style="background:rgba(201,184,255,0.15)">👩‍🏫</div>
+          <div>
+            <div class="tcard-name">Professora Juliana</div>
+            <div class="tcard-info">Educadora infantil · Belo Horizonte</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing">
+  <div class="container text-center" style="text-align:center">
+    <div class="reveal">
+      <div class="tag" style="justify-content:center"><div class="tag-dot"></div>Investimento</div>
+      <h2 class="s-title">Um ano inteiro por<br>menos de R$ 1 por dia</h2>
+      <p class="s-sub" style="margin:0 auto">Acesso completo — vocabulário, histórias e tudo que vier a seguir.</p>
+    </div>
+
+    <div class="pricing-wrap reveal">
+      <div class="pricing-glow"></div>
+      <div class="pricing-card">
+        <div class="pricing-badge">🔥 Oferta de lançamento — 50% off</div>
+        <div class="pricing-amount">
+          <span class="pricing-currency">R$</span>
+          <span class="pricing-value">197</span>
+        </div>
+        <div class="pricing-per">acesso anual completo</div>
+        <div class="pricing-original">De R$ 397</div>
+
+        <ul class="pricing-list">
+          <li><div class="pcheck">✓</div>4 livros de vocabulário completos</li>
+          <li><div class="pcheck">✓</div>4 histórias com personagens e áudio</li>
+          <li><div class="pcheck">✓</div>Inglês americano (en-US) em tudo</li>
+          <li><div class="pcheck">✓</div>Funciona no celular, tablet e PC</li>
+          <li><div class="pcheck">✓</div>Novos livros todo mês incluídos</li>
+          <li><div class="pcheck">✓</div>Progressão de 0 a 6 anos</li>
+          <li><div class="pcheck">✓</div>12 meses de acesso completo</li>
+        </ul>
+
+        <a href="https://pay.hotmart.com/V105809354H" class="btn-buy">📚 Garantir meu acesso agora</a>
+        <p class="pricing-guarantee">🔒 Pagamento seguro · 7 dias de garantia total</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="container text-center" style="text-align:center">
+    <div class="reveal">
+      <div class="tag" style="justify-content:center"><div class="tag-dot"></div>Dúvidas</div>
+      <h2 class="s-title">Perguntas frequentes</h2>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item reveal">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Precisa instalar algum aplicativo?
+          <div class="faq-plus">+</div>
+        </div>
+        <div class="faq-a">Não! A biblioteca funciona direto no navegador do celular, tablet ou computador. Basta clicar no link de acesso e começar a usar imediatamente.</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-1">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Para qual idade é indicado?
+          <div class="faq-plus">+</div>
+        </div>
+        <div class="faq-a">O conteúdo é dividido por faixa etária: de 0 a 2 anos (vocabulário simples com ilustrações), 2 a 3 anos (rotina e frases), 3 a 5 anos (histórias curtas com personagens) e 5 a 6 anos (narrativas completas bilíngues).</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-2">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          O inglês é realmente americano?
+          <div class="faq-plus">+</div>
+        </div>
+        <div class="faq-a">Sim! Todo o conteúdo em inglês usa o padrão American English (en-US) exclusivamente. Nenhuma outra variação é aceita — seu filho aprende o inglês americano correto desde o início.</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-3">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          Novos livros são adicionados?
+          <div class="faq-plus">+</div>
+        </div>
+        <div class="faq-a">Sim! Novos títulos são adicionados regularmente — tanto livros de vocabulário quanto histórias com personagens. Quem tem acesso anual recebe todos automaticamente sem pagar nada a mais.</div>
+      </div>
+      <div class="faq-item reveal reveal-delay-4">
+        <div class="faq-q" onclick="toggleFaq(this)">
+          E se eu não gostar?
+          <div class="faq-plus">+</div>
+        </div>
+        <div class="faq-a">Você tem 7 dias de garantia total e incondicional. Se não ficar satisfeito por qualquer motivo, devolvemos 100% do valor investido. Sem perguntas, sem burocracia.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="final-section">
+  <div class="final-glow"></div>
+  <div class="container text-center" style="text-align:center">
+    <div class="reveal">
+      <h2 class="s-title" style="font-size:clamp(36px,6vw,60px)">Seu filho merece o<br>melhor começo 🌟</h2>
+      <p class="s-sub" style="margin:16px auto 48px">Comece hoje. R$ 197 por um ano inteiro de aprendizado bilíngue de qualidade.</p>
+      <a class="btn-final" href="https://pay.hotmart.com/V105809354H" target="_blank">
+        📚 Quero a Biblioteca Agora
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">Luna<span>Reads</span></div>
+  <div class="footer-copy">© 2025 LunaReads — Biblioteca Infantil · Todos os direitos reservados</div>
+  <div class="footer-links">
+    <a href="#" class="footer-link">Termos</a>
+    <a href="#" class="footer-link">Privacidade</a>
+    <a href="#" class="footer-link">Contato</a>
+  </div>
+</footer>
+
+<script>
+// ── CUSTOM CURSOR ──
+const cursor = document.getElementById('cursor');
+const ring   = document.getElementById('cursor-ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx - 6 + 'px';
+  cursor.style.top  = my - 6 + 'px';
+});
+function animRing(){
+  rx += (mx - rx - 18) * 0.12;
+  ry += (my - ry - 18) * 0.12;
+  ring.style.left = rx + 'px';
+  ring.style.top  = ry + 'px';
+  requestAnimationFrame(animRing);
+}
+animRing();
+document.querySelectorAll('a,button,.book-card,.feature-card,.hbook').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.transform = 'scale(2.5)';
+    ring.style.transform = 'scale(1.5)';
+    ring.style.opacity = '0.3';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.transform = 'scale(1)';
+    ring.style.transform = 'scale(1)';
+    ring.style.opacity = '0.5';
+  });
+});
+
+// ── SCROLL EFFECTS ──
+const nav = document.getElementById('nav');
+window.addEventListener('scroll', () => {
+  nav.classList.toggle('scrolled', window.scrollY > 40);
+});
+
+// ── SCROLL REVEAL ──
+const revels = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if(e.isIntersecting){ e.target.classList.add('visible'); obs.unobserve(e.target); }
+  });
+},{threshold:0.1});
+revels.forEach(r => obs.observe(r));
+
+// ── BOOK FILTER TABS ──
+function filterBooks(type, el){
+  document.querySelectorAll('.book-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.book-card').forEach(card => {
+    if(type === 'all' || card.dataset.type === type){
+      card.style.display = 'block';
+      card.style.animation = 'popIn 0.4s ease both';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// ── FAQ ──
+function toggleFaq(el){
+  const item = el.parentElement;
+  const open = item.classList.contains('open');
+  document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('open'));
+  if(!open) item.classList.add('open');
+}
+
+// ── SMOOTH SCROLL ──
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const t = document.querySelector(a.getAttribute('href'));
+    if(t){ e.preventDefault(); t.scrollIntoView({behavior:'smooth',block:'start'}); }
+  });
+});
+
+// ── POPLN ANIMATION ──
+const style = document.createElement('style');
+style.textContent = `@keyframes popIn{from{opacity:0;transform:scale(0.9) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}`;
+document.head.appendChild(style);
+</script>
+</body>
+</html>
